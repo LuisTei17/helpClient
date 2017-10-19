@@ -55,7 +55,7 @@ export default class Registro extends Component {
                 </div>
                 <div className="main">
                     <div className="pure-form pure-form-aligned">
-                        <h1 className="alert alert-warning">
+                        <h1 className="msg-erro alert alert-warning">
                             {
                                 this.state.msgErroForm
                             }
