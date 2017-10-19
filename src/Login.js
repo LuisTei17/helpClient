@@ -1,14 +1,20 @@
 import React, {Component} from 'react';
-import {browserHistory} from 'react-router';
-
+import PubSub from 'pubsub-js';
 import './css/login.css';
+import {Redirect} from 'react-router';
+import TratadorErros from './TratadorErrors';
+import $ from 'jquery';
 export default class Login extends Component {
     
     constructor(props) {
         super(props);
-        this.state = {msg:this.props.location.query.msg};
+        this.state = {msgErroForm:'', FireRedirect: false};
     }
 
+    componentDidMount() {
+        $('.msg-erro').hide();
+    }
+    
     enviaForm(event) {
         event.preventDefault();
 
@@ -23,33 +29,43 @@ export default class Login extends Component {
         fetch('https://helptccapi.herokuapp.com/v1/login', requestInfo)
             .then(response => {
                 if(response.ok) {
-
-                    return response.text();
+                    return response.text();                    
                 } else {
                     throw new Error('não foi possível logar')
                 }
             })
             .then(res => {
-                console.log(JSON.parse(res).token);
                 var token = JSON.parse(res).token;
                 localStorage.setItem('auth-token', token );
-                browserHistory.push('/');
                 
-
+                
+                this.setState({FireRedirect: true})
+                window.location.reload();
             })
             .catch(error => {
-                this.setState({msg:error.msg})
-            })
+                $('.msg-erro').show();
+                this.setState({msgErroForm: error + ""});
+        })
     }
 
     render() {
+        const { from } = this.props.location.state || '/';
+        const { FireRedirect } = this.state;
+        
+       
         return (
+            
             <div id="layout">
                 <div className="header">
                     <img src={require("./img/logo.png")} alt="logo"/>
                 </div>
                 <div className="main">
                     <div className="pure-form pure-form-aligned">
+                        <h1 className="msg-erro alert alert-warning">
+                            {
+                                this.state.msgErroForm
+                            }
+                        </h1>
                         <form className="formularioLogin pure-form pure-form-aligned" onSubmit={this.enviaForm.bind(this)} method="post">          
                             <div className="pure-control-group">
                                 <label>Username:</label>
@@ -68,12 +84,19 @@ export default class Login extends Component {
                             </div>
                             <p>Ainda não tem uma conta? registre-se <a href="/registro">aqui</a> para fazer o bem</p>
                         </form>
+                        {
+                            FireRedirect && (
+                                <Redirect to={from || '/'}/>
+                            )
+                        }
                     </div>
                 </div>
             </div>
         )
 
     }
+
+    
 
 
 }

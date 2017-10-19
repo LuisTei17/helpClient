@@ -4,11 +4,10 @@ import Postagem from './components/Post';
 class Posts extends Component {
     constructor() {
         super();
-        this.state = {posts: [{"titulo":"oi", "texto":"caraca", "autor":"pedro"}]};
+        this.state = {posts: {"titulo":"oi", "texto":"caraca", "autor":"pedro"}};
     }
 
     componentDidMount(){
-
         //https://helptccapi.herokuapp.com/v1/feed?token=${localStorage.getItem("auth-token")}
         fetch('http://localhost:4030/v1/in/feed?token=${localStorage.getItem("auth-token")')
          .then(response => console.log(response)    
@@ -27,10 +26,10 @@ class Posts extends Component {
             <div>
                 <h1>Posts</h1>
                 {
-                    this.state.posts.map(post => <Postagem key={post.id} post={post}/>)
+           //         this.state.posts.map(post => <Postagem key={post.id} post={post}/>)
                 }
             </div>
-        );
+        )
     }
 }
 
@@ -43,6 +42,4 @@ export default class Feed extends Component {
             </div>     
         );
     }
-
-
 }

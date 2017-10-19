@@ -1,30 +1,21 @@
 import React, {Component} from 'react';
-import {browserHistory} from 'react-router';
-//import PubSub from 'pubsub-js';
-//import TratadorErros from './TratadorErrors';
+import PubSub from 'pubsub-js';
+import $ from 'jquery';
+import { Redirect } from 'react-router';
 
 export default class Registro extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {msg:this.props.location.query.msg, msgErro: ''};
+        this.state = {msgErroForm: '', FireRedirect: false};
     }
-/*
-    componentDidMount() {
-        PubSub.subscribe("erro-validacao", function(topico, erro){
-            if(erro.field === this.props.name) {
-                this.setState({msgErro:erro.defaultMessage})
-            }
-        }.bind(this));
 
-        PubSub.subscribe("limpa-erros", function(topico) {
-            this.setState({msgErro:''});
-        }.bind(this))
+    componentDidMount() {
+        $('.msg-erro').hide();        
     }
-*/
+
     enviaForm(event) {
         event.preventDefault();
-
         const requestInfo = {
             method: 'POST',
             body: JSON.stringify({
@@ -41,17 +32,22 @@ export default class Registro extends Component {
         fetch('https://helptccapi.herokuapp.com/v1/registroUsuario', requestInfo) 
             .then(response => {
                 if(response.ok) {
-                    browserHistory.push('/login')                
+                    this.setState({FireRedirect: true})
                 } else {
-                    throw new Error('não foi possível logar')
+                    throw new Error('não foi possível registrar')
                 }
             })
+            .then(res => {
+                console.log(res);
+            })
             .catch(error => {
-//                new TratadorErros().publicaErros(error.responseJSON)                
+                this.setState({msgErroForm: error+""})
             })
     }
 
     render() {
+        const { from } = this.props.location.state || '/';
+        const { FireRedirect } = this.state;
         return (
             <div id="layout">
                 <div className="header">
@@ -59,6 +55,11 @@ export default class Registro extends Component {
                 </div>
                 <div className="main">
                     <div className="pure-form pure-form-aligned">
+                        <h1 className="alert alert-warning">
+                            {
+                                this.state.msgErroForm
+                            }
+                        </h1>
                         <form className="formularioLogin pure-form pure-form-aligned" onSubmit={this.enviaForm.bind(this)} method="post">          
                             <div className="pure-control-group">
                                 <label>Username:</label>
@@ -87,6 +88,11 @@ export default class Registro extends Component {
                             </div>
                             <p>Já tem uma conta? faça login <a href="/login">aqui</a> para ajudar alguém</p>
                         </form>
+                        {
+                            FireRedirect && (
+                                <Redirect to={from || '/'}/>
+                            )
+                        }
                     </div>
                 </div>
             </div>

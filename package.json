@@ -1,5 +1,5 @@
 {
-  "name": "cdc-admin",
+  "name": "help",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -7,7 +7,7 @@
     "pubsub-js": "^1.5.7",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
-    "react-router": "^2.8.0",
+    "react-router-dom": "^4.2.2",
     "react-scripts": "1.0.14"
   },
   "scripts": {
