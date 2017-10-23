@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import PubSub from 'pubsub-js';
 import $ from 'jquery';
 import { Redirect } from 'react-router';
 
@@ -7,29 +6,96 @@ export default class Registro extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {msgErroForm: '', FireRedirect: false};
+        this.state = {msgErroForm: '', FireRedirect: false, categorias:[], usuarios:[], tipoUsuario: '', validado: false};
+    }
+
+    validaDadoFormularioRegistro() {
+        var todosInputsFomrulario = $('form').find('.field:visible');
+        todosInputsFomrulario.each(function(element) {
+            if($(this).val().length < 4) {
+                $(this).parent().addClass("has-error");
+                $(this).parent().append("<p class='msgErro help-block'>Menos de 4 caracteres</p>");
+            }
+        })
+        if($('#senha').val() !== $('#senha2').val()) {                
+            $('#senha').parent().addClass("has-error");
+            $('#senha').parent().append("<p class='msgErro help-block'>As senhas não coincidem</p>");
+        }    
+        if (this.state.tipoUsuario === "Instituicao" && $(".categoria-instituicao-form select").prop("selectedIndex") === 0) {
+                $(".categoria-instituicao-form select").parent().addClass("has-error");
+                $(".categoria-instituicao-form select").parent().append("<p class='msgErro help-block'>Seleciona uma categoria</p>");
+        } else {
+            this.setState({validado:true});
+        };
     }
 
     componentDidMount() {
-        $('.msg-erro').hide();        
+        $('form').hide();
+        $('.msg-erro').hide();
+        this.iniciaForm();
+        this.buscaTiposUsuarios();
+        this.buscaCategorias();        
     }
 
+    iniciaForm() {
+        $('#tipo').change(function(){
+            if($('#tipo').prop('selectedIndex') === 0) {
+                $('form').hide();
+            } else {
+                $('form').show();
+            }
+            $('#tipo option:selected').each(function(){
+                this.setState({tipoUsuario:$('#tipo option:selected').val()});
+                console.log(this.state.tipoUsuario)
+                if(this.state.tipoUsuario === "Usuario") {
+                    $('.cnpj-form').hide();
+                } else {
+                    $('.cnpj-form').show();
+                }
+                if(this.state.tipoUsuario === "Instituicao") {
+                    $('.categoria-instituicao-form').show();
+                    $('.categorias-form').hide();
+                } else {
+                    $('.categoria-instituicao-form').hide();
+                    $('.categorias-form').show();
+                }
+            }.bind(this))
+        }.bind(this))
+    }
+
+    buscaCategorias() {
+        $.get("https://helptccapi.herokuapp.com/v1/categorias", {}, function(categorias) {
+            this.setState({categorias: categorias})
+        }.bind(this))
+        
+    }
+    
+    buscaTiposUsuarios() {
+        $.get("https://helptccapi.herokuapp.com/v1/usuarios", {}, function(usuarios) {
+            this.setState({usuarios: usuarios})
+        }.bind(this))
+    }
+    
     enviaForm(event) {
         event.preventDefault();
-        const requestInfo = {
-            method: 'POST',
-            body: JSON.stringify({
+        $('.msgErro').remove();
+        $('.has-error').removeClass('has-error');
+        this.validaDadoFormularioRegistro();
+        if(this.state.validado) {
+            const requestInfo = {
+                method: 'POST',
+                body: JSON.stringify({
                 username:this.username.value, password:this.senha.value,
-                password2:this.password2, email:this.email.value,
+                password2:this.senha2.value, email:this.email.value,
                 categorias:['idosos']
             }),
             headers: new Headers({
                 'Content-type':'application/json'
             })
-        };
-
-        //fetch('http://localhost:4030/v1/registroUsuario', requestInfo)
-        fetch('https://helptccapi.herokuapp.com/v1/registroUsuario', requestInfo) 
+            };
+        
+            //fetch('http://localhost:4030/v1/registro'+this.state.tipoUsuario, requestInfo)
+            fetch('https://helptccapi.herokuapp.com/v1/registroUsuario', requestInfo) 
             .then(response => {
                 if(response.ok) {
                     this.setState({FireRedirect: true})
@@ -37,64 +103,94 @@ export default class Registro extends Component {
                     throw new Error('não foi possível registrar')
                 }
             })
-            .then(res => {
-                console.log(res);
-            })
             .catch(error => {
                 this.setState({msgErroForm: error+""})
             })
+        }
     }
-
+    
     render() {
         const { from } = this.props.location.state || '/';
         const { FireRedirect } = this.state;
         return (
-            <div id="layout">
-                <div className="header">
-                    <img src={require("./img/logo.png")} alt="logo"/>
-                </div>
-                <div className="main">
-                    <div className="pure-form pure-form-aligned">
-                        <h1 className="msg-erro alert alert-warning">
-                            {
-                                this.state.msgErroForm
-                            }
-                        </h1>
-                        <form className="formularioLogin pure-form pure-form-aligned" onSubmit={this.enviaForm.bind(this)} method="post">          
-                            <div className="pure-control-group">
-                                <label>Username:</label>
-                                <input className="pure-input-1-3 pure-input-rounded" id="username" type="text" name="username" ref={(input) => this.username = input} placeholder="Username"/>                                              
-                                <span className="error">{this.state.msgErro}</span>
-                            </div>
-                            <div className="pure-control-group">
-                                <label>Email:</label>
-                                <input className="pure-input-1-3 pure-input-rounded" id="email" type="email" name="email" ref={(input) => this.email = input} placeholder="Email"/>                               
-                                <span className="error">{this.state.msgErro}</span>
-                            </div>
-                            <div className="pure-control-group">
-                                <label>Senha:</label>
-                                <input className="pure-input-1-3 pure-input-rounded" id="senha" type="password" name="password" ref={(input) => this.senha = input} placeholder="Senha"/>                               
-                                <span className="error">{this.state.msgErro}</span>
-                            </div>
-                            <div className="pure-control-group">
-                                <label>Confirme a senha:</label>
-                                <input className="pure-input-1-3 pure-input-rounded" id="senha2" type="password" name="password2" ref={(input) => this.senha2 = input} placeholder="Senha"/>                               
-                                <span className="error">{this.state.msgErro}</span>
-                            </div>
-                            <input type="hidden" id="tipo" name="tipo" value="usuario" ref={(input) => this.tipo = input} />
-                            <div className="pure-control-group">
-                                <label></label>
-                                <button className="pure-button  pure-input-1-3 pure-button-primary pure-input-rounded" type="submit">Registro</button>                                                                      
-                            </div>
-                            <p>Já tem uma conta? faça login <a href="/login">aqui</a> para ajudar alguém</p>
-                        </form>
+            <div className="container">    
+                <div className="form-group">
+                    <label htmlFor="tipo">Escolha o tipo de usuário</label>
+                    <select className="form-control" id="tipo">
+                        <option>Escolha o usuario</option>
                         {
-                            FireRedirect && (
-                                <Redirect to={from || '/'}/>
-                            )
+                            this.state.usuarios.map(usuario => {
+                              return (
+                                  <option key={usuario._id}>{usuario.titulo}</option>
+                              )
+                            })
                         }
-                    </div>
+                    </select>
                 </div>
+                <img src={require("./img/logo.png")} alt="logo"/>
+                <h1 className="msg-erro alert alert-warning">
+                {
+                    this.state.msgErroForm
+                }
+                </h1>
+                <form className="formulario-tipo-login" onSubmit={this.enviaForm.bind(this)} method="post">          
+                    <div className="username form-group">
+                        <label className="control-label">Username:</label>
+                        <input className="form-control field" id="username" type="text" name="username" ref={(input) => this.username = input} placeholder="Username"/>                                              
+                    </div>
+                    <div className="email form-group">
+                        <label className="control-label">Email:</label>
+                        <input className="form-control field" id="email" type="email" name="email" ref={(input) => this.email = input} placeholder="Email"/>                               
+                    </div>
+                    <div className="senha form-group">
+                        <label className="control-label">Senha:</label>
+                        <input className="form-control field" id="senha" type="password" name="password" ref={(input) => this.senha = input} placeholder="Senha"/>                               
+                    </div>
+                    <div className="senha-2 form-group">
+                        <label className="control-label">Confirme a senha:</label>
+                        <input className="form-control field" id="senha2" type="password" name="password2" ref={(input) => this.senha2 = input} placeholder="Senha"/>                               
+                    </div>
+                    <div className="form-group cnpj-form">
+                        <label htmlFor="cnpj">CNPJ</label>
+                        <input type="text" name="cnpj" id="cnpj" className="form-control field"/>
+                    </div>
+                    <div className="form-group categorias-form">
+                         {
+                             this.state.categorias.map(categoria => {
+                                 return (
+                                    <div key={categoria.titulo} className="checkbox">
+                                        <label>
+                                            <input type="checkbox" name="categoria" value={categoria.titulo}/>{categoria.titulo}
+                                        </label>
+                                    </div>
+                                 );
+                             })
+                         }
+                    </div>
+                    <div className="form-group categoria-instituicao-form">
+                        <label htmlFor="categoria">Selecione a categoria</label>
+                        <select  className="form-control" id="categoria" name="tipoCategoria" >
+                            <option>Escolha uma categoria</option>
+                            {
+                                this.state.categorias.map(categoria => {
+                                    return(
+                                        <option key={categoria._id} name="categoria" value={categoria.titulo}>{categoria.titulo}</option>
+                                    );
+                                })
+                            }
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label></label>
+                        <button className="btn btn-primary" type="submit">Registro</button>                                                                      
+                    </div>
+                    <p className="text-link-formulario ">Já tem uma conta? faça login <a href="/login">aqui</a> para ajudar alguém</p>
+                </form>
+                 {
+                    FireRedirect && (
+                        <Redirect to={from || '/'}/>
+                    )
+                }
             </div>
         )
     }
