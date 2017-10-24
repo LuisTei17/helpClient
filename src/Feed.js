@@ -6,16 +6,15 @@ export default class Feed extends Component {
     
     constructor() {
         super();
-        this.state = {posts:[{id: 1, titulo:"oi", texto:"texto", autor:"joao"}]};
+        this.state = {posts:[]};
     }
 
     componentDidMount(){
-        //https://helptccapi.herokuapp.com/v1/feed?token=${localStorage.getItem("auth-token")}
-        fetch('http://localhost:4030/v1/in/feed?' + $.param({token: localStorage.getItem('auth-token')}))
-        .then(response => console.log(response))
+        fetch('https://helptccapi.herokuapp.com/v1/feed?' + $.param({token:localStorage.getItem("auth-token")}))
+        //fetch('http://localhost:4030/v1/in/feed?' + $.param({token: localStorage.getItem('auth-token')}))
+        .then(response =>JSON.stringify(response))
         .then(postagens => {
-            console.log(postagens);
-            //this.setState({posts:postagens});
+            this.setState({posts:postagens})
         });
     }
 
@@ -24,7 +23,7 @@ export default class Feed extends Component {
             <div>
                 <h1>Feed</h1>
                 {
-                    this.state.posts.map(post =><Postagem key={post.id} post={post}/> )
+                    this.state.posts.map(post =><Postagem key={post._id} post={post}/> )
                 }
             </div>
         )
