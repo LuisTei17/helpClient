@@ -1,15 +1,16 @@
 import React, {Component} from 'react';
 import './css/login.css';
-import {Redirect} from 'react-router';
 import $ from 'jquery';
+import { browserHistory } from 'react-router';
+
 export default class Login extends Component {
     
     constructor(props) {
         super(props);
-        this.state = {msgErroForm:'', FireRedirect: false, usuarios: [], tipoUsuario:'', categoria: '', validado: false};
+        this.state = {msgErroForm:'', usuarios: [], tipoUsuario:'', categoria: '', validado: false};
     }
 
-    validaDadoFormularioRegistro() {
+    validaDadoFormularioLogin() {
         var todosInputsFomrulario = $('form').find('.field:visible');
         todosInputsFomrulario.each(function(element) {
             if($(this).val().length < 4) {
@@ -54,48 +55,15 @@ export default class Login extends Component {
 
     buscaTiposUsuarios() {
         $.get("https://helptccapi.herokuapp.com/v1/usuarios", {}, function(usuarios) {
+        //$.get("https://localhost:4030/v1/usuarios", {}, function(usuarios) {
             this.setState({usuarios: usuarios})
         }.bind(this))
-    }
-
-    enviaForm(event) {
-        event.preventDefault();
-        $('.msgErro').remove();
-        $('.has-error').removeClass('has-error');
-        
-        this.validaDadoFormularioRegistro();
-        if(this.state.validado) {
-            const requestInfo = {
-                method: 'POST',
-                body: JSON.stringify({
-                username:this.username.value, password:this.senha.value,
-                password2:this.senha2.value, email:this.email.value,
-                categorias:['idosos']
-            }),
-            headers: new Headers({
-                'Content-type':'application/json'
-            })
-            };
-        
-            //fetch('http://localhost:4030/v1/registroUsuario', requestInfo)
-            fetch('https://helptccapi.herokuapp.com/v1/registroUsuario', requestInfo) 
-            .then(response => {
-                if(response.ok) {
-                    this.setState({FireRedirect: true})
-                } else {
-                    throw new Error('não foi possível registrar')
-                }
-            })
-            .catch(error => {
-                this.setState({msgErroForm: error+""})
-            })
-        }
     }
 
     
     enviaForm(event) {
         event.preventDefault();
-        this.validaDadoFormularioRegistro();
+        this.validaDadoFormularioLogin();
         const requestInfo = {
             method: 'POST',
             body: JSON.stringify({username:this.username.value, password:this.senha.value, tipo:this.tipo.value}),
@@ -107,30 +75,25 @@ export default class Login extends Component {
         fetch('https://helptccapi.herokuapp.com/v1/login', requestInfo)
             .then(response => {
                 if(response.ok) {
-                    return response.text();                    
-                } else {
-                    throw new Error('não foi possível logar')
+                    
+                    return response.text();
                 }
+                throw ({"msg":"Não foi possível logar"})    
             })
             .then(res => {
+                console.log(res);
                 var token = JSON.parse(res).token;
                 localStorage.setItem('auth-token', token );
-                    
-                
-                this.setState({FireRedirect: true})
-                window.location.reload();
+
+                browserHistory.push('/in/feed');
             })
             .catch(error => {
                 $('.msg-erro').show();
-               this.setState({msgErroForm: error});
+               this.setState({msgErroForm: error.msg});
         })
     }
 
     render() {
-        const { from } = this.props.location.state || '/';
-        const { FireRedirect } = this.state;
-        
-       
         return (
             <div className="container">
                 <div className="form-group">
@@ -170,11 +133,6 @@ export default class Login extends Component {
                     </div>
                     <p>Ainda não tem uma conta? registre-se <a href="/registro">aqui</a> para fazer o bem</p>
                 </form>
-                {
-                    FireRedirect && (
-                        <Redirect to={from || '/'}/>
-                    )
-                }
             </div>
         )
 

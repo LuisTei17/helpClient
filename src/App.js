@@ -7,82 +7,101 @@ import Perfil from './Perfil';
 import Home from './Home';
 import {Redirect} from 'react-router';
 import PubSub from 'pubsub-js';
-import {BrowserRouter as Router, Route, Link} from 'react-router-dom';
+import {Router, Route, Link, browserHistory} from 'react-router';
 
-
-const PrivateRoute = ({component: Component, ...rest}) => (
-  <Route {...rest} render={props => (
-    verificaLogado() ? (
-      $('.logado').hide(),
-      <Component {...props}/>
-
-    ) : (
-      <Redirect to={{
-        pathname: '/login',
-        state: {from: props.location}
-      }}/>
-    )
-  )}/>
-)
-
-function verificaLogado() {
-
-  let logado = localStorage.getItem('auth-token') != undefined;
-
-  if(logado) {
-    $('.deslogado').hide();
-    $('.logado').show();
-    return true;
+function autentica(nextState, replace) {
+  let isLogado = localStorage.getItem('auth-token') != undefined;
+  if(isLogado) {
+    fetch("https://helptccapi.herokuapp.com/v1/autentica?"+ $.param({"token":localStorage.getItem('auth-token')}))
+      .then(response => {
+        if(response.ok) {
+          $('.deslogado').hide();
+          $('.logado').show();
+          replace("/in/feed")
+         
+        } else {
+          $('.deslogado').show();
+          $('.logado').hide();
+          replace("/login");
+        }
+      }).catch(error => 
+        replace("/login")
+      )  
   } else {
+    replace("/login");
+  }
+  
+}
+
+function desloga() {
+  fetch("https://helptccapi.herokuapp.com/v1/in/logout?" +  $.param({"token":localStorage.getItem('auth-token')}))
+//  fetch("https://localhost:4030/v1/in/logout")
+    .then(response => {
+      if(response.ok) {
+        localStorage.removeItem('auth-token')
+        window.location.reload();
+      }
+    })
+}
+
+class Navbar extends Component {
+
+  componentDidMount() {
     $('.deslogado').show();
     $('.logado').hide();
-    return false;
+   }
+  
+
+  render() {
+    return (
+      <div>
+      <nav className="navbar navbar-default">
+        <div className="container-fluid">
+          <div className="navbar-header">
+            <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+              <span className="sr-only">Toggle navigation</span>
+              <span className="icon-bar"></span>
+              <span className="icon-bar"></span>
+              <span className="icon-bar"></span>
+            </button>
+          </div>
+          <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul className="nav navbar-nav">   
+                <li><Link to="/">Página inicial</Link></li>
+                <li className="deslogado"><Link to="/login">Login</Link></li>
+                <li className="deslogado"><Link to="/registro" >Registro</Link></li>
+                <li className="logado"><Link to="/in/feed">Feed</Link></li>
+                <li className="logado"><Link to="/in/perfil">Perfil</Link></li>
+                <li className="logado"><a  onClick={desloga}>Deslogar</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <div id="main">
+          {this.props.children}
+        </div>       
+      </div>
+    )
   }
 }
 
 class App extends Component {
-  
-  componentDidMount() {
-    verificaLogado();
+  constructor() {
+    super();
+    this.state = {logado: false};
   }
-
-  desloga() {
-    localStorage.removeItem('auth-token');
-  }
-  
 
   render() { 
    
     return (
-      <Router>
-        <div>
-          <nav className="navbar navbar-default">
-            <div className="container-fluid">
-              <div className="navbar-header">
-                <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                  <span className="sr-only">Toggle navigation</span>
-                  <span className="icon-bar"></span>
-                  <span className="icon-bar"></span>
-                  <span className="icon-bar"></span>
-                </button>
-              </div>
-              <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul className="nav navbar-nav">   
-                    <li className="deslogado pure-menu-item"><Link to="/login" className="pure-menu-link">Login</Link></li>
-                    <li className="deslogado pure-menu-item"><Link to="/registro" className="pure-menu-link" >Registro</Link></li>
-                    <li className="logado pure-menu-item"><Link to="/" className="pure-menu-link">Feed</Link></li>
-                    <li className="logado pure-menu-item"><Link to="/perfil" className="pure-menu-link">Perfil</Link></li>
-                    <li className="logado pure-menu-item"><Link to="" onClick={this.desloga} className="pure-menu-link">Deslogar</Link></li>
-                </ul>
-              </div>
-            </div>
-          </nav>
-          <PrivateRoute verificaLogado={this.verificaLogado} exact path="/" component={Feed}/>
-          <PrivateRoute verificaLogado={this.verificaLogado} exact path="/perfil" component={Perfil}/>
-          <Route exact path="/login" component={Login}/>
-          <Route exact path="/registro" component={Registro}/>
-          <Route exact path="/home" component={Home}/>       
-        </div>
+      <Router history={browserHistory}>
+            <Route path="" component={Navbar}>
+              <Route path="/in/feed" component={Feed} onEnter={autentica}/>
+              <Route path="/in/perfil" component={Perfil} onEnter={autentica}/>
+              <Route path="/registro" component={Registro}/>
+              <Route path="/login" component={Login}/>
+              <Route path="/" component={Home}/>
+            </Route>
       </Router>
     );
   }

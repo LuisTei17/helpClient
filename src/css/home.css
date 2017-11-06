@@ -1,5 +1,9 @@
-.btInicio {
-    position: relative;
-    left: 80px;
-    margin: 5px;
+.carousel-control.left, 
+.carousel-control.right {
+    background-image: none
+}
+@media screen and (min-width: 1190px) {
+    img {
+    margin-left: 5%;
+    }
 }

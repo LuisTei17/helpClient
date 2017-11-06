@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
 import $ from 'jquery';
-import { Redirect } from 'react-router';
+import { browserHistory } from 'react-router';
 
 export default class Registro extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {msgErroForm: '', FireRedirect: false, categorias:[], usuarios:[], tipoUsuario: '', validado: false};
+        this.state = {msgErroForm: '', categoriasForm:[], categorias:[], usuarios:[], tipoUsuario: '', validado: false};
     }
 
     validaDadoFormularioRegistro() {
@@ -46,7 +46,7 @@ export default class Registro extends Component {
             }
             $('#tipo option:selected').each(function(){
                 this.setState({tipoUsuario:$('#tipo option:selected').val()});
-                console.log(this.state.tipoUsuario)
+
                 if(this.state.tipoUsuario === "Usuario") {
                     $('.cnpj-form').hide();
                 } else {
@@ -61,6 +61,14 @@ export default class Registro extends Component {
                 }
             }.bind(this))
         }.bind(this))
+    }
+
+    determinaCategorias() {
+        var categorias = [];
+        $('.categorias-form input:checked').each(function(index) {
+            categorias.push($(this).val());
+        })
+        this.setState({categoriasEnviaForm:categorias})
     }
 
     buscaCategorias() {
@@ -80,14 +88,16 @@ export default class Registro extends Component {
         event.preventDefault();
         $('.msgErro').remove();
         $('.has-error').removeClass('has-error');
+        
         this.validaDadoFormularioRegistro();
+        this.determinaCategorias();
         if(this.state.validado) {
             const requestInfo = {
                 method: 'POST',
                 body: JSON.stringify({
                 username:this.username.value, password:this.senha.value,
                 password2:this.senha2.value, email:this.email.value,
-                categorias:['idosos']
+                categorias:this.state.categoriasEnviaForm
             }),
             headers: new Headers({
                 'Content-type':'application/json'
@@ -98,20 +108,18 @@ export default class Registro extends Component {
             fetch('https://helptccapi.herokuapp.com/v1/registroUsuario', requestInfo) 
             .then(response => {
                 if(response.ok) {
-                    this.setState({FireRedirect: true})
+                    browserHistory.push('/login');
                 } else {
-                    throw new Error('não foi possível registrar')
+                    throw ({"msg":"Não foi possível registrar"})
                 }
             })
             .catch(error => {
-                this.setState({msgErroForm: error+""})
+                this.setState({msgErroForm: error.msg})
             })
         }
     }
     
     render() {
-        const { from } = this.props.location.state || '/';
-        const { FireRedirect } = this.state;
         return (
             <div className="container">    
                 <div className="form-group">
@@ -152,7 +160,7 @@ export default class Registro extends Component {
                     </div>
                     <div className="form-group cnpj-form">
                         <label htmlFor="cnpj">CNPJ</label>
-                        <input type="text" name="cnpj" id="cnpj" className="form-control field"/>
+                        <input type="text" name="cnpj" id="cnpj" className="form-control field" ref={(input) => this.cnpj = input} placeholder="Cnpj" />
                     </div>
                     <div className="form-group categorias-form">
                          {
@@ -174,7 +182,7 @@ export default class Registro extends Component {
                             {
                                 this.state.categorias.map(categoria => {
                                     return(
-                                        <option key={categoria._id} name="categoria" value={categoria.titulo}>{categoria.titulo}</option>
+                                        <option key={categoria._id} name="categoria" value={categoria.titulo} ref={(input) => this.categoria = input}>{categoria.titulo}</option>
                                     );
                                 })
                             }
@@ -186,11 +194,7 @@ export default class Registro extends Component {
                     </div>
                     <p className="text-link-formulario ">Já tem uma conta? faça login <a href="/login">aqui</a> para ajudar alguém</p>
                 </form>
-                 {
-                    FireRedirect && (
-                        <Redirect to={from || '/'}/>
-                    )
-                }
+                
             </div>
         )
     }
