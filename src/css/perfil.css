@@ -1,0 +1,16 @@
+.introducao {
+    
+    width: 30%;
+}
+
+ul {
+    list-style: none;
+    
+  }
+  
+  .lista-insignias li {
+    position: relative;
+    top: 20px;
+    margin: 10px;
+    display: inline;
+  }

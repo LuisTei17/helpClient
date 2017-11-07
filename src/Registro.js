@@ -59,6 +59,7 @@ export default class Registro extends Component {
                     $('.categoria-instituicao-form').hide();
                     $('.categorias-form').show();
                 }
+                $('.escolhe-usuario').hide();
             }.bind(this))
         }.bind(this))
     }
@@ -95,13 +96,13 @@ export default class Registro extends Component {
             const requestInfo = {
                 method: 'POST',
                 body: JSON.stringify({
-                username:this.username.value, password:this.senha.value,
-                password2:this.senha2.value, email:this.email.value,
-                categorias:this.state.categoriasEnviaForm
-            }),
-            headers: new Headers({
-                'Content-type':'application/json'
-            })
+                    username:this.username.value, password:this.senha.value,
+                    password2:this.senha2.value, email:this.email.value,
+                    categorias:this.state.categoriasEnviaForm
+                }),
+                headers: new Headers({
+                    'Content-type':'application/json'
+                })
             };
         
             //fetch('http://localhost:4030/v1/registro'+this.state.tipoUsuario, requestInfo)
@@ -122,6 +123,12 @@ export default class Registro extends Component {
     render() {
         return (
             <div className="container">    
+                <img src={require("./img/logo.png")} alt="logo"/>
+                <h1 className="msg-erro alert alert-warning">
+                {
+                    this.state.msgErroForm
+                }
+                </h1>
                 <div className="form-group">
                     <label htmlFor="tipo">Escolha o tipo de usuário</label>
                     <select className="form-control" id="tipo">
@@ -135,12 +142,6 @@ export default class Registro extends Component {
                         }
                     </select>
                 </div>
-                <img src={require("./img/logo.png")} alt="logo"/>
-                <h1 className="msg-erro alert alert-warning">
-                {
-                    this.state.msgErroForm
-                }
-                </h1>
                 <form className="formulario-tipo-login" onSubmit={this.enviaForm.bind(this)} method="post">          
                     <div className="username form-group">
                         <label className="control-label">Username:</label>

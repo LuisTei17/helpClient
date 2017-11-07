@@ -96,6 +96,12 @@ export default class Login extends Component {
     render() {
         return (
             <div className="container">
+                <img src={require("./img/logo.png")} alt="logo"/>
+                <h1 className="msg-erro alert alert-warning">
+                    {
+                        this.state.msgErroForm
+                    }
+                </h1>
                 <div className="form-group">
                     <label htmlFor="tipo">Escolha o tipo de usuário</label>
                     <select className="form-control" id="tipo">
@@ -109,12 +115,6 @@ export default class Login extends Component {
                         }
                     </select>
                 </div>
-                <img src={require("./img/logo.png")} alt="logo"/>
-                <h1 className="msg-erro alert alert-warning">
-                    {
-                        this.state.msgErroForm
-                    }
-                </h1>
                 <form className="formulario-tipo-login" onSubmit={this.enviaForm.bind(this)} method="post">          
                     <div className="form-group">
                         <label>Username:</label>
