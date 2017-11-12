@@ -10,8 +10,8 @@ export default class Feed extends Component {
     }
 
     componentDidMount(){
-        //fetch('https://helptccapi.herokuapp.com/v1/feed?' + $.param({token:localStorage.getItem("auth-token")}))
-        fetch('http://localhost:4030/v1/in/feed?' + $.param({token: localStorage.getItem('auth-token')}))
+        fetch('https://helptccapi.herokuapp.com/v1/in/feed?' + $.param({token:localStorage.getItem("auth-token")}))
+        //fetch('http://localhost:4030/v1/in/feed?' + $.param({token: localStorage.getItem('auth-token')}))
         .then(response =>response.json())
         .then(postagens => {
             

@@ -1,16 +1,41 @@
+@media screen and (min-width: 1000px) {
+  .info {
+    width: 10%;
+  }
+}
+
+.info {
+  width: 300px;
+}
+
+.info h1 {
+  position: relative;
+  right: 60px;
+  top: 90px;
+  float: right;
+}
 .introducao {
-    
-    width: 30%;
+  position: relative;
+  left: 18%;
+  width: 30%;
+  bottom: 90px;
+}
+
+.img-perfil {
+  width: 150px;
+  height: 150px;
 }
 
 ul {
-    list-style: none;
-    
-  }
-  
-  .lista-insignias li {
-    position: relative;
-    top: 20px;
-    margin: 10px;
-    display: inline;
-  }
+  list-style: none;    
+}
+
+.lista-insignias {
+  width: 30%;
+}
+
+.lista-insignias li {
+  position: relative;
+  top: 20px;
+  margin: 5px;
+}

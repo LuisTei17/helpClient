@@ -14,17 +14,17 @@ export default class Home extends Component {
 
                         <div className="carousel-inner" role="listbox">
                             <div className="item active">
-                                <img src={'/img/pobreza-1.jpg'} alt="Imagem de pessoa com poucos recursos financeiros"/>
+                                <img src={require('./img/pobreza-1.jpg')} alt="Imagem de pessoa com poucos recursos financeiros"/>
                                 <div className="carousel-caption">
                                 </div>
                             </div>
                             <div className="item">
-                                <img src="/img/pobreza-2.jpg" alt="Coração de pedra em uma mão"/>
+                                <img src={require("./img/pobreza-2.jpg")} alt="Coração de pedra em uma mão"/>
                                 <div className="carousel-caption">
                                 </div>
                             </div>
                             <div className="item">
-                                <img src="/img/pobreza-3.jpg" alt="Mãos abertas"/>
+                                <img src={require("./img/pobreza-3.jpg")} alt="Mãos abertas"/>
                                 <div className="carousel-caption">
                                 </div>
                             </div>

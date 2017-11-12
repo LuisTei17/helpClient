@@ -9,7 +9,12 @@ export default class Registro extends Component {
         this.state = {msgErroForm: '', categoriasForm:[], categorias:[], usuarios:[], tipoUsuario: '', validado: false};
     }
 
-    validaDadoFormularioRegistro() {
+    validaDadoFormularioRegistro(event) {
+        event.preventDefault();
+
+        $('.msgErro').remove();
+        $('.has-error').removeClass('has-error');
+
         var todosInputsFomrulario = $('form').find('.field:visible');
         todosInputsFomrulario.each(function(element) {
             if($(this).val().length < 4) {
@@ -26,6 +31,7 @@ export default class Registro extends Component {
                 $(".categoria-instituicao-form select").parent().append("<p class='msgErro help-block'>Seleciona uma categoria</p>");
         } else {
             this.setState({validado:true});
+            this.determinaCategorias();
         };
     }
 
@@ -70,6 +76,7 @@ export default class Registro extends Component {
             categorias.push($(this).val());
         })
         this.setState({categoriasEnviaForm:categorias})
+        this.enviaForm();
     }
 
     buscaCategorias() {
@@ -85,14 +92,12 @@ export default class Registro extends Component {
         }.bind(this))
     }
     
-    enviaForm(event) {
-        event.preventDefault();
-        $('.msgErro').remove();
-        $('.has-error').removeClass('has-error');
-        
-        this.validaDadoFormularioRegistro();
-        this.determinaCategorias();
+    enviaForm() {
+    
+        console.log("aaaa")
+        console.log(this.state.validado)
         if(this.state.validado) {
+            console.log("aaaaa")
             const requestInfo = {
                 method: 'POST',
                 body: JSON.stringify({
@@ -142,7 +147,7 @@ export default class Registro extends Component {
                         }
                     </select>
                 </div>
-                <form className="formulario-tipo-login" onSubmit={this.enviaForm.bind(this)} method="post">          
+                <form className="formulario-tipo-login" onSubmit={this.validaDadoFormularioRegistro.bind(this)} method="post">          
                     <div className="username form-group">
                         <label className="control-label">Username:</label>
                         <input className="form-control field" id="username" type="text" name="username" ref={(input) => this.username = input} placeholder="Username"/>                                              

@@ -5,30 +5,28 @@ import Registro from './Registro';
 import Feed from './Feed';
 import Perfil from './Perfil';
 import Home from './Home';
-import {Redirect} from 'react-router';
-import PubSub from 'pubsub-js';
 import {Router, Route, Link, browserHistory} from 'react-router';
 
 function autentica(nextState, replace) {
-  let isLogado = localStorage.getItem('auth-token') != undefined;
-  if(isLogado) {
-    fetch("https://helptccapi.herokuapp.com/v1/autentica?"+ $.param({"token":localStorage.getItem('auth-token')}))
-      .then(response => {
-        if(response.ok) {
-          $('.deslogado').hide();
-          $('.logado').show();
-          replace("/in/feed")
-         
-        } else {
-          $('.deslogado').show();
-          $('.logado').hide();
-          replace("/login");
-        }
-      }).catch(error => 
-        replace("/login")
-      )  
+  if(localStorage.getItem('auth-token')) {
+    setTimeout(
+      fetch("https://helptccapi.herokuapp.com/v1/autentica?"+ $.param({"token":localStorage.getItem('auth-token')}))
+          .then(response => {
+            if(response.ok) {
+              $('.deslogado').hide();
+              $('.logado').show();
+              console.log("waaa")
+              replace("/in/feed")
+            
+            } else {
+              $('.deslogado').show();
+              $('.logado').hide();
+              localStorage.removeItem('auth-token');
+              window.location.reload();
+            }
+          })
+    , 4000)
   } else {
-    replace("/login");
   }
   
 }
@@ -72,7 +70,7 @@ class Navbar extends Component {
                 <li className="deslogado"><Link to="/registro" >Registro</Link></li>
                 <li className="logado"><Link to="/in/feed">Feed</Link></li>
                 <li className="logado"><Link to="/in/perfil">Perfil</Link></li>
-                <li className="logado"><a  onClick={desloga}>Deslogar</a></li>
+                <li className="logado deslogar"><a className="btn" onClick={desloga}>Deslogar</a></li>
             </ul>
           </div>
         </div>
