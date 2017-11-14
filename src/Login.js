@@ -66,16 +66,16 @@ export default class Login extends Component {
         this.validaDadoFormularioLogin();
         const requestInfo = {
             method: 'POST',
-            body: JSON.stringify({username:this.username.value, password:this.senha.value, tipo:this.tipo.value}),
+            body: JSON.stringify({username:this.username.value, password:this.senha.value, tipo:this.state.tipoUsuario}),
             headers: new Headers({
                 'Content-type':'application/json'
             })
+
         };
         //fetch('http://localhost:4030/v1/login', requestInfo)
         fetch('https://helptccapi.herokuapp.com/v1/login', requestInfo)
             .then(response => {
                 if(response.ok) {
-                    
                     return response.text();
                 }
                 throw ({"msg":"Não foi possível logar"})    

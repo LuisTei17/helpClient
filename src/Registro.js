@@ -111,7 +111,7 @@ export default class Registro extends Component {
             };
         
             //fetch('http://localhost:4030/v1/registro'+this.state.tipoUsuario, requestInfo)
-            fetch('https://helptccapi.herokuapp.com/v1/registroUsuario', requestInfo) 
+            fetch('https://helptccapi.herokuapp.com/v1/registro' + this.state.tipoUsuario, requestInfo) 
             .then(response => {
                 if(response.ok) {
                     browserHistory.push('/login');

@@ -36,6 +36,7 @@ export default class Perfil extends Component {
         fetch("https://racionaismc.herokuapp.com/1")
         .then(res => res.json())
         .then(paragrafo => {
+            console.log(this.state.perfil)
             this.setState({frase:paragrafo.paragrafos[0]})
             
         }
