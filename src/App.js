@@ -5,24 +5,32 @@ import Registro from './Registro';
 import Feed from './Feed';
 import Perfil from './Perfil';
 import Home from './Home';
+import "./css/index.css";
 import {Router, Route, Link, browserHistory} from 'react-router';
+
+function logado() {
+  $('.deslogado').hide();
+  $('.logado').show();
+}
+
+function deslogado() {
+  $('.deslogado').show();
+  $('.logado').hide();
+}
 
 function autentica(nextState, replace) {
   if(localStorage.getItem('auth-token')) {
     setTimeout(
-      fetch("https://helptccapi.herokuapp.com/v1/autentica?"+ $.param({"token":localStorage.getItem('auth-token')}))
-          .then(response => {
+      //fetch("https://helptccapi.herokuapp.com/v1/autentica?"+ $.param({"token":localStorage.getItem('auth-token')}))
+        fetch("http://localhost:4030/v1/autentica?"+ $.param({"token":localStorage.getItem('auth-token')}))        
+        .then(response => {
             if(response.ok) {
-              $('.deslogado').hide();
-              $('.logado').show();
-              console.log("waaa")
+              logado();
               replace("/in/feed")
             
             } else {
-              $('.deslogado').show();
-              $('.logado').hide();
+              deslogado();
               localStorage.removeItem('auth-token');
-              window.location.reload();
             }
           })
     , 4000)
@@ -32,12 +40,14 @@ function autentica(nextState, replace) {
 }
 
 function desloga() {
-  fetch("https://helptccapi.herokuapp.com/v1/in/logout?" +  $.param({"token":localStorage.getItem('auth-token')}))
-//  fetch("https://localhost:4030/v1/in/logout")
+  //fetch("https://helptccapi.herokuapp.com/v1/in/logout?" +  $.param({"token":localStorage.getItem('auth-token')}))
+    fetch("http://localhost:4030/v1/in/logout?" +  $.param({"token":localStorage.getItem('auth-token')}))
     .then(response => {
       if(response.ok) {
-        localStorage.removeItem('auth-token')
-        window.location.reload();
+        localStorage.removeItem('auth-token');
+        deslogado();
+        browserHistory.push("/login");
+        
       }
     })
 }
@@ -45,8 +55,7 @@ function desloga() {
 class Navbar extends Component {
 
   componentDidMount() {
-    $('.deslogado').show();
-    $('.logado').hide();
+    deslogado(); 
    }
   
 
@@ -65,12 +74,12 @@ class Navbar extends Component {
           </div>
           <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul className="nav navbar-nav">   
-                <li><Link to="/">Página inicial</Link></li>
-                <li className="deslogado"><Link to="/login">Login</Link></li>
-                <li className="deslogado"><Link to="/registro" >Registro</Link></li>
-                <li className="logado"><Link to="/in/feed">Feed</Link></li>
-                <li className="logado"><Link to="/in/perfil">Perfil</Link></li>
-                <li className="logado deslogar"><a className="btn" onClick={desloga}>Deslogar</a></li>
+                <li className="itens-menu"><Link to="/"><p>Página inicial</p></Link></li>
+                <li className="itens-menu deslogado"><Link to="/login"> <p>Login</p></Link></li>
+                <li className="itens-menu deslogado"><Link to="/registro" ><p>Registro</p></Link></li>
+                <li className="itens-menu logado"><Link to="/in/feed"><p>Feed</p></Link></li>
+                <li className="itens-menu logado"><Link to="/in/perfil"><p>Perfil</p></Link></li>
+                <li className="itens-menu logado deslogar"><a className="btn" onClick={desloga}><p>Deslogar</p></a></li>
             </ul>
           </div>
         </div>

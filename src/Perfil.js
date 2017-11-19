@@ -9,8 +9,8 @@ export default class Perfil extends Component {
     }
 
     buscaPerfil() {
-        //fetch("http://localhost:4030/v1/in/perfil?" + $.param({"token":localStorage.getItem('auth-token')}))
-        fetch("https://helptccapi.herokuapp.com/v1/in/perfil?" + $.param({"token":localStorage.getItem('auth-token')}))
+        fetch("http://localhost:4030/v1/in/perfil?" + $.param({"token":localStorage.getItem('auth-token')}))
+        //fetch("https://helptccapi.herokuapp.com/v1/in/perfil?" + $.param({"token":localStorage.getItem('auth-token')}))
             .then(response => 
                 response.json()
             ).then(perfil =>
@@ -19,15 +19,10 @@ export default class Perfil extends Component {
                 browserHistory.push("/login?msg=erro ao validar usuario")
             )
     }
-
-    modificaForm() {
-        $('.form-muda-senha').toggle();
-    }
    
     componentDidMount() {
         this.buscaPerfil()
-        $('.form-muda-senha').hide();
-        $('.mudarSenha').click(this.modificaForm)
+
         this.pegaFraseRacionais();
 
     }
@@ -36,20 +31,59 @@ export default class Perfil extends Component {
         fetch("https://racionaismc.herokuapp.com/1")
         .then(res => res.json())
         .then(paragrafo => {
-            console.log(this.state.perfil)
             this.setState({frase:paragrafo.paragrafos[0]})
             
         }
-        )
+        ).catch(err => {
+        })
     } 
 
     render() {
         return(
             <div className="container perfil">
                 <div className="info">
-                    <img className="img-perfil" src={require("./img/perfil.png")} alt="foto de perfil"/>
-                    <h1>{this.state.perfil.username}</h1>
+                    <img className="img-perfil img img-responsive" src={require("./img/perfil.png")} alt="foto de perfil"/>
+                   
                 </div>
+                <div className="introducao">
+                    <h1>{this.state.perfil.username}</h1>
+                    <p className="introducao">
+                        {
+                            this.state.frase
+                        }<br></br>
+                        <button className="mudarSenha btn btn primary senha"  data-toggle="modal" data-target="#myModal">Mudar senha</button>                 
+                    </p>
+                    
+
+                    <div className="modal fade" id="myModal" tabIndex="-1" role="dialog" aria-labelledby="myModalLabel">
+                        <div className="modal-dialog" role="document">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 className="modal-title" id="myModalLabel">Mudar senha</h4>
+                                </div>
+                                <div className="modal-body">
+                                    <form className="form-muda-senha">
+                                        <div className="form-group form-div">
+                                            <label htmlFor="senhaAtual">Senha atual</label>
+                                            <input className="form-control" id="senhaAtual" name="senhaAtual" placeholder="Senha atual"></input>
+                                        </div>
+                                        <div className="form-group form-div">
+                                            <label htmlFor="novaSenha">Nova senha</label>
+                                            <input className="form-control" id="novaSenha" name="novaSenha" placeholder="Nova senha"></input>
+                                        </div>
+                                        <div className="form-group form-div">
+                                            <label htmlFor="novaSenha2">Confirme a senha</label>
+                                            <input className="form-control" id="novaSenha2" name="novaSenha2" placeholder="Confirme a senha"></input>
+                                        </div>
+                                        <button type="submit" className="btn btn-warning">Enviar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="info-tipo">
                     {(() => {
                         if(this.state.perfil.tipo !== "instituicao") {
@@ -71,8 +105,7 @@ export default class Perfil extends Component {
                     } 
                     )()}
                 </div>{/*FIm da linha da classe info*/}
-                <div className="info-2">
-                   
+                
                     { /* 
                         this.state.categorias.map((categoria, index) => {
                             return (
@@ -82,31 +115,6 @@ export default class Perfil extends Component {
                     }
                 */}
 
-                    <p className="introducao">
-                        {
-                            this.state.frase
-                        }
-                        <a className="mudarSenha btn btn primary senha">Mudar senha</a>                 
-                    </p>
-
-
-                    <form className="form-muda-senha">
-                        <div className="form-group">
-                            <label htmlFor="senhaAtual">Senha atual</label>
-                            <input className="form-control" id="senhaAtual" name="senhaAtual" placeholder="Senha atual"></input>
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="novaSenha">Nova senha</label>
-                            <input className="form-control" id="novaSenha" name="novaSenha" placeholder="Nova senha"></input>
-                        </div>
-                        <div className="form-group ">
-                            <label htmlFor="novaSenha2">Confirme a senha</label>
-                            <input className="form-control" id="novaSenha2" name="novaSenha2" placeholder="Confirme a senha"></input>
-                        </div>
-                        <input type="submit" className="btn btn-warning"/>
-                        <a className="mudarSenha">Cancelar</a>
-                    </form>
-                </div>
             </div>
         );
     }

@@ -1,41 +1,22 @@
-@media screen and (min-width: 1000px) {
-  .info {
-    width: 10%;
-  }
-}
 
+
+.perfil {
+  display: table-cell;
+}
 .info {
-  width: 300px;
+  float: left;
+  margin: 20px;
+
 }
 
-.info h1 {
-  position: relative;
-  right: 60px;
-  top: 90px;
-  float: right;
-}
-.introducao {
-  position: relative;
-  left: 18%;
-  width: 30%;
-  bottom: 90px;
-}
-
-.img-perfil {
-  width: 150px;
-  height: 150px;
-}
-
-ul {
-  list-style: none;    
-}
 
 .lista-insignias {
-  width: 30%;
+  list-style: none;
 }
 
-.lista-insignias li {
-  position: relative;
-  top: 20px;
-  margin: 5px;
+@media screen and (max-width:500px) {
+  .info {
+    margin-left: 20%;
+    margin-right: 30%;
+  }
 }

@@ -1,4 +1,11 @@
-autor {
+
+.postagem {
+    background: #FFFFFF;
+    margin-top: 10px;
+  }
+
+.autor {
     font-size: 10px;
     text-align: right;
 }
+

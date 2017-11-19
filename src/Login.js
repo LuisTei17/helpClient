@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import './css/login.css';
 import $ from 'jquery';
 import { browserHistory } from 'react-router';
 
@@ -54,8 +53,8 @@ export default class Login extends Component {
     }
 
     buscaTiposUsuarios() {
-        $.get("https://helptccapi.herokuapp.com/v1/usuarios", {}, function(usuarios) {
-        //$.get("https://localhost:4030/v1/usuarios", {}, function(usuarios) {
+        $.get("http://localhost:4030/v1/usuarios", {}, function(usuarios) {
+        //$.get("https://helptccapi.herokuapp.com/v1/usuarios", {}, function(usuarios) {
             this.setState({usuarios: usuarios})
         }.bind(this))
     }
@@ -72,8 +71,8 @@ export default class Login extends Component {
             })
 
         };
-        //fetch('http://localhost:4030/v1/login', requestInfo)
-        fetch('https://helptccapi.herokuapp.com/v1/login', requestInfo)
+        fetch('http://localhost:4030/v1/login', requestInfo)
+        //fetch('https://helptccapi.herokuapp.com/v1/login', requestInfo)
             .then(response => {
                 if(response.ok) {
                     return response.text();
@@ -81,7 +80,6 @@ export default class Login extends Component {
                 throw ({"msg":"Não foi possível logar"})    
             })
             .then(res => {
-                console.log(res);
                 var token = JSON.parse(res).token;
                 localStorage.setItem('auth-token', token );
 

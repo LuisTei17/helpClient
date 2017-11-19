@@ -6,11 +6,10 @@ export default class Registro extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {msgErroForm: '', categoriasForm:[], categorias:[], usuarios:[], tipoUsuario: '', validado: false};
+        this.state = {categoriasEnviaForm:[],msgErroForm: '', categoriaEscolhida: '', categoriasForm:[], categorias:[], usuarios:[], tipoUsuario: '', validado: false};
     }
 
-    validaDadoFormularioRegistro(event) {
-        event.preventDefault();
+    validaDadoFormularioRegistro() {
 
         $('.msgErro').remove();
         $('.has-error').removeClass('has-error');
@@ -31,7 +30,6 @@ export default class Registro extends Component {
                 $(".categoria-instituicao-form select").parent().append("<p class='msgErro help-block'>Seleciona uma categoria</p>");
         } else {
             this.setState({validado:true});
-            this.determinaCategorias();
         };
     }
 
@@ -70,59 +68,68 @@ export default class Registro extends Component {
         }.bind(this))
     }
 
-    determinaCategorias() {
-        var categorias = [];
-        $('.categorias-form input:checked').each(function(index) {
-            categorias.push($(this).val());
-        })
-        this.setState({categoriasEnviaForm:categorias})
-        this.enviaForm();
-    }
-
     buscaCategorias() {
-        $.get("https://helptccapi.herokuapp.com/v1/categorias", {}, function(categorias) {
+        //$.get("https://helptccapi.herokuapp.com/v1/categorias", {}, function(categorias) {
+        $.get("http://localhost:4030/v1/categorias", {}, function(categorias) {
             this.setState({categorias: categorias})
         }.bind(this))
         
     }
     
     buscaTiposUsuarios() {
-        $.get("https://helptccapi.herokuapp.com/v1/usuarios", {}, function(usuarios) {
+        //$.get("https://helptccapi.herokuapp.com/v1/usuarios", {}, function(usuarios) {
+        $.get("http://localhost:4030/v1/usuarios", {}, function(usuarios) {
             this.setState({usuarios: usuarios})
         }.bind(this))
     }
     
-    enviaForm() {
-    
-        console.log("aaaa")
-        console.log(this.state.validado)
-        if(this.state.validado) {
-            console.log("aaaaa")
-            const requestInfo = {
-                method: 'POST',
-                body: JSON.stringify({
-                    username:this.username.value, password:this.senha.value,
-                    password2:this.senha2.value, email:this.email.value,
-                    categorias:this.state.categoriasEnviaForm
-                }),
-                headers: new Headers({
-                    'Content-type':'application/json'
-                })
-            };
+    enviaForm(event) {
+        event.preventDefault();
+
+        var categoria = $('#categoria').find('option:selected').val();
+       
+        this.validaDadoFormularioRegistro();
+        var categorias = [];
+        $('.categorias-form input:checked').each(function(index) {
+            categorias.push($(this).val());
+        })
+        const requestInfo = {
+            method: 'POST',
+            body: JSON.stringify({
+                username:this.username.value, password:this.senha.value,
+                password2:this.senha2.value, email:this.email.value,
+                categorias:categorias, cnpj:this.cnpj.value,categoria:categoria
+            }),
+            headers: new Headers({
+                'Content-type':'application/json'
+            })
+        };
+        fetch('http://localhost:4030/v1/registro'+this.state.tipoUsuario, requestInfo)
+        //fetch('https://helptccapi.herokuapp.com/v1/registro' + this.state.tipoUsuario, requestInfo) 
+        .then(response => {
+            /*
+            if(response.ok) {
+                browserHistory.push('/login');
+            } else {
+                throw (response.json())
+            }
+            */
+            return response.text();
+        })
+        .then(error => {
+            $('.msg-erro').show();
+            var erro = JSON.parse(error);
+            this.setState({msgErroForm: erro.msg})
+        })
+        .catch(err =>
+            console.log(err)
+        )
         
-            //fetch('http://localhost:4030/v1/registro'+this.state.tipoUsuario, requestInfo)
-            fetch('https://helptccapi.herokuapp.com/v1/registro' + this.state.tipoUsuario, requestInfo) 
-            .then(response => {
-                if(response.ok) {
-                    browserHistory.push('/login');
-                } else {
-                    throw ({"msg":"Não foi possível registrar"})
-                }
-            })
-            .catch(error => {
-                this.setState({msgErroForm: error.msg})
-            })
-        }
+    }
+
+    escolheCategoria() {
+       
+
     }
     
     render() {
@@ -147,7 +154,7 @@ export default class Registro extends Component {
                         }
                     </select>
                 </div>
-                <form className="formulario-tipo-login" onSubmit={this.validaDadoFormularioRegistro.bind(this)} method="post">          
+                <form className="formulario-tipo-login" onSubmit={this.enviaForm.bind(this)} method="post">          
                     <div className="username form-group">
                         <label className="control-label">Username:</label>
                         <input className="form-control field" id="username" type="text" name="username" ref={(input) => this.username = input} placeholder="Username"/>                                              
@@ -188,7 +195,7 @@ export default class Registro extends Component {
                             {
                                 this.state.categorias.map(categoria => {
                                     return(
-                                        <option key={categoria._id} name="categoria" value={categoria.titulo} ref={(input) => this.categoria = input}>{categoria.titulo}</option>
+                                        <option key={categoria._id} name="categoria" value={categoria.titulo}>{categoria.titulo}</option>
                                     );
                                 })
                             }
